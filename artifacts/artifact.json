@@ -1,0 +1,771 @@
+{
+  "manifest": {
+    "blocks": [
+      {
+        "body": "# Variant-Aware G2P Evaluation",
+        "id": "title",
+        "type": "markdown"
+      },
+      {
+        "body": "## Technical summary\n\nA first-reference-only scorer understated exact-match performance on ambiguous names. Across 4,862 normalized first-name spellings, exact match rose from 72.2% to 73.2% when every listed reference was accepted. For the 305 names with multiple references, the change was 48.9% to 65.6%, rescuing 51 predictions that were valid under a non-first reference.\n\n**Decision:** the evaluator is ready as a methodology sample, but this run is deliberately blocked from model-ranking claims. The public model's training code uses CMUdict, which is also the reference source here.",
+        "id": "technical_summary",
+        "sourceId": "headline_query",
+        "type": "markdown"
+      },
+      {
+        "cardIds": [
+          "names_card",
+          "overall_card",
+          "multi_card",
+          "rescue_card"
+        ],
+        "id": "headline_metrics",
+        "type": "metric-strip"
+      },
+      {
+        "body": "## Multiple accepted pronunciations materially change the score\n\nSingle-reference names are unchanged by construction. In the multi-reference cohort, accepting all listed variants adds 16.7% to exact-match accuracy. The softer one-phone and 25% PER gates move less because they already give near misses partial tolerance. The implication is narrow but important: a production benchmark should separate model errors from reference-selection errors.",
+        "id": "variant_finding",
+        "sourceId": "cohort_query",
+        "type": "markdown"
+      },
+      {
+        "chartId": "cohort_accuracy_chart",
+        "id": "cohort_chart",
+        "type": "chart"
+      },
+      {
+        "body": "## The false rejections are inspectable, not just an aggregate\n\nEach row below is an exact prediction that fails only because the first dictionary pronunciation is treated as canonical. A reviewer can trace the prediction, rejected first reference, accepted variant, and reference count at the name grain.",
+        "id": "rescue_explanation",
+        "sourceId": "variant_rescue_query",
+        "type": "markdown"
+      },
+      {
+        "id": "rescue_table_block",
+        "tableId": "variant_rescues_table",
+        "type": "table"
+      },
+      {
+        "body": "## Large disagreements expose the model and corpus boundary\n\nThe worst rows include spellings whose pronunciation depends on language, culture, or lexicalization beyond a simple English grapheme path. They are candidates for locale-aware references and human review, not evidence that one universal pronunciation is correct.",
+        "id": "failure_explanation",
+        "sourceId": "worst_case_query",
+        "type": "markdown"
+      },
+      {
+        "id": "worst_table_block",
+        "tableId": "worst_cases_table",
+        "type": "table"
+      },
+      {
+        "body": "## Scope, data, and metric definitions\n\nThe unit is one lowercase ASCII name spelling. The source population contains 7,944 rows across NLTK's two first-name lists; normalization leaves 7,536 eligible unique spellings, of which 4,862 join to CMUdict (64.5%). Canonical exact means equality to the first reference. Any-reference exact means equality to at least one listed reference. PER is phoneme-level Levenshtein distance divided by reference length, minimized across references.",
+        "id": "scope",
+        "sourceId": "headline_query",
+        "type": "markdown"
+      },
+      {
+        "body": "## Methodology keeps scoring and prediction paths separate\n\nThe run unions and normalizes the two name lists, verifies source hashes, inner-joins to CMUdict, and calls `G2p.predict` directly so dictionary lookup cannot silently return the reference. It then scores the same prediction against the first reference and against the complete reference set. Full row-level output is retained in `evaluation_rows.jsonl`; the report snapshot contains bounded aggregates and deterministic review samples.",
+        "id": "methodology",
+        "sourceId": "evaluation_code",
+        "type": "markdown"
+      },
+      {
+        "id": "quality_block",
+        "tableId": "quality_table",
+        "type": "table"
+      },
+      {
+        "body": "## Limitations and robustness gates\n\nThis is an evaluator demonstration, not a population estimate or model benchmark. NLTK's name lists are dated, binary-labeled source files; those labels are intentionally discarded. CMUdict is North-American-English-oriented, does not encode the identity or locale of a specific person, and covers only part of the normalized list. Most importantly, the public checkpoint was trained from CMUdict entries, so reference leakage is structural. The report therefore refuses a model-selection conclusion even though the calculations are reproducible.",
+        "id": "limitations",
+        "type": "markdown"
+      },
+      {
+        "body": "## Recommended next step\n\nRun this evaluator on a truly held-out, consented dataset with person-confirmed pronunciations, locale and language metadata, and a frozen model-training manifest. Add top-k coverage, confidence calibration, selective-risk curves, and human-review cost. Predeclare the primary metric and slices before seeing model outputs.",
+        "id": "next_steps",
+        "type": "markdown"
+      },
+      {
+        "body": "## Further questions\n\n- Which variants are interchangeable for a named person rather than merely present in a dictionary?\n- Which locale, language, and identity slices require separate phoneme inventories?\n- What confidence threshold minimizes harmful mispronunciation while keeping human-review volume acceptable?\n- How should corrections persist without turning popularity into correctness?",
+        "id": "further_questions",
+        "type": "markdown"
+      }
+    ],
+    "cards": [
+      {
+        "dataset": "headline",
+        "description": "Normalized first-name spellings with at least one CMUdict reference.",
+        "id": "names_card",
+        "metrics": [
+          {
+            "field": "evaluated_names",
+            "format": "number",
+            "label": "Names evaluated"
+          }
+        ],
+        "sourceId": "headline_query"
+      },
+      {
+        "dataset": "headline",
+        "description": "Exact-match rate when every listed pronunciation is accepted.",
+        "id": "overall_card",
+        "metrics": [
+          {
+            "field": "variant_exact",
+            "format": "percent",
+            "label": "Any-reference exact"
+          },
+          {
+            "field": "strict_exact",
+            "format": "percent",
+            "label": "First-reference exact"
+          }
+        ],
+        "sourceId": "headline_query"
+      },
+      {
+        "dataset": "headline",
+        "description": "Exact-match rate among names with multiple listed references.",
+        "id": "multi_card",
+        "metrics": [
+          {
+            "field": "multi_variant_exact",
+            "format": "percent",
+            "label": "Multi-reference exact"
+          },
+          {
+            "field": "multi_strict_exact",
+            "format": "percent",
+            "label": "First-reference exact"
+          },
+          {
+            "field": "multi_delta",
+            "format": "percent",
+            "label": "Variant-aware lift",
+            "signed": true
+          }
+        ],
+        "sourceId": "headline_query"
+      },
+      {
+        "dataset": "headline",
+        "description": "Predictions falsely rejected when only the first reference is treated as valid.",
+        "id": "rescue_card",
+        "metrics": [
+          {
+            "field": "variant_rescues",
+            "format": "number",
+            "label": "Variant rescues"
+          }
+        ],
+        "sourceId": "headline_query"
+      }
+    ],
+    "charts": [
+      {
+        "comparisonContext": {
+          "baseline": "First CMUdict reference",
+          "denominator": "Eligible names in each reference cohort",
+          "grain": "One normalized name spelling",
+          "unit": "Share of names"
+        },
+        "dataset": "scoring_by_cohort",
+        "encodings": {
+          "color": {
+            "field": "cohort",
+            "label": "Reference cohort",
+            "type": "nominal"
+          },
+          "tooltip": [
+            {
+              "field": "sample_size",
+              "format": "number",
+              "label": "Names",
+              "type": "quantitative"
+            },
+            {
+              "field": "numerator",
+              "format": "number",
+              "label": "Passing names",
+              "type": "quantitative"
+            }
+          ],
+          "x": {
+            "field": "metric",
+            "label": "Scoring criterion",
+            "type": "nominal"
+          },
+          "y": {
+            "field": "rate",
+            "format": "percent",
+            "label": "Pass rate",
+            "type": "quantitative"
+          }
+        },
+        "id": "cohort_accuracy_chart",
+        "intent": "comparison",
+        "labels": {
+          "values": "all"
+        },
+        "layout": "full",
+        "legend": {
+          "position": "bottom",
+          "sort": "spec",
+          "title": "Reference cohort"
+        },
+        "maxRows": 8,
+        "palette": {
+          "kind": "categorical"
+        },
+        "question": "How much does accepting every listed pronunciation change measured G2P performance?",
+        "rationale": "Grouped bars keep the two cohorts and four same-unit pass criteria directly comparable.",
+        "settings": {
+          "categoryLabelPolicy": "wrap",
+          "groupMode": "grouped",
+          "sort": "none"
+        },
+        "sourceId": "cohort_query",
+        "subtitle": "4,557 single-reference and 305 multi-reference names; all rates use one 4,862-name snapshot.",
+        "surface": {
+          "interactiveLegend": true,
+          "surface": "card",
+          "viewMode": "both"
+        },
+        "title": "Evaluation pass rates by reference cohort",
+        "type": "bar",
+        "valueFormat": "percent"
+      }
+    ],
+    "description": "A contamination-aware pronunciation benchmark demonstration.",
+    "generatedAt": "2026-07-22T09:34:39Z",
+    "sources": [
+      {
+        "id": "headline_query",
+        "label": "Aggregate evaluation metrics",
+        "path": "evaluation.sqlite",
+        "query": {
+          "sql": "WITH overall AS (\n    SELECT\n        COUNT(*) AS evaluated_names,\n        AVG(strict_exact) AS strict_exact,\n        AVG(variant_exact) AS variant_exact,\n        SUM(rescued_by_variant_scoring) AS variant_rescues\n    FROM evaluation_rows\n),\nmulti_reference AS (\n    SELECT\n        AVG(strict_exact) AS multi_strict_exact,\n        AVG(variant_exact) AS multi_variant_exact\n    FROM evaluation_rows\n    WHERE reference_count > 1\n)\nSELECT\n    overall.evaluated_names,\n    overall.strict_exact,\n    overall.variant_exact,\n    multi_reference.multi_strict_exact,\n    multi_reference.multi_variant_exact,\n    multi_reference.multi_variant_exact - multi_reference.multi_strict_exact AS multi_delta,\n    overall.variant_rescues\nFROM overall\nCROSS JOIN multi_reference\n"
+        }
+      },
+      {
+        "id": "cohort_query",
+        "label": "Reference-cohort scoring metrics",
+        "path": "evaluation.sqlite",
+        "query": {
+          "sql": "WITH cohort_summary AS (\n    SELECT\n        CASE\n            WHEN reference_count = 1 THEN 'Single reference'\n            ELSE 'Multiple references'\n        END AS cohort,\n        COUNT(*) AS sample_size,\n        SUM(strict_exact) AS strict_count,\n        SUM(variant_exact) AS variant_count,\n        SUM(within_one_phone) AS one_phone_count,\n        SUM(per_at_most_25pct) AS per_25_count\n    FROM evaluation_rows\n    GROUP BY CASE\n        WHEN reference_count = 1 THEN 'Single reference'\n        ELSE 'Multiple references'\n    END\n),\nmetric_rows AS (\n    SELECT cohort, 'Canonical exact' AS metric,\n           1.0 * strict_count / sample_size AS rate,\n           sample_size, strict_count AS numerator, 1 AS metric_order\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'Any-reference exact',\n           1.0 * variant_count / sample_size,\n           sample_size, variant_count, 2\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'Within one phone',\n           1.0 * one_phone_count / sample_size,\n           sample_size, one_phone_count, 3\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'PER at most 25%',\n           1.0 * per_25_count / sample_size,\n           sample_size, per_25_count, 4\n    FROM cohort_summary\n)\nSELECT cohort, metric, rate, sample_size, numerator\nFROM metric_rows\nORDER BY metric_order,\n         CASE cohort WHEN 'Single reference' THEN 1 ELSE 2 END\n"
+        }
+      },
+      {
+        "id": "variant_rescue_query",
+        "label": "Non-first reference exact matches",
+        "path": "evaluation.sqlite",
+        "query": {
+          "sql": "SELECT\n    display_name AS name,\n    prediction,\n    canonical_reference,\n    closest_reference AS matched_variant,\n    reference_count\nFROM evaluation_rows\nWHERE rescued_by_variant_scoring = 1\nORDER BY name\nLIMIT 12\n"
+        }
+      },
+      {
+        "id": "worst_case_query",
+        "label": "Largest minimum phoneme error rates",
+        "path": "evaluation.sqlite",
+        "query": {
+          "sql": "SELECT\n    display_name AS name,\n    prediction,\n    closest_reference,\n    min_per,\n    reference_count\nFROM evaluation_rows\nORDER BY min_per DESC, name\nLIMIT 12\n"
+        }
+      },
+      {
+        "id": "quality_query",
+        "label": "Data and claim gates",
+        "path": "evaluation.sqlite",
+        "query": {
+          "sql": "SELECT check_name AS 'check', status, observed, decision_risk\nFROM quality_checks\nORDER BY check_name\n"
+        }
+      },
+      {
+        "id": "evaluation_code",
+        "label": "Reproducible evaluator and report builder",
+        "path": "run_evaluation.py"
+      },
+      {
+        "href": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/names.zip",
+        "id": "nltk_names",
+        "label": "NLTK names corpus snapshot"
+      },
+      {
+        "href": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/cmudict.zip",
+        "id": "nltk_cmudict",
+        "label": "NLTK CMUdict snapshot"
+      },
+      {
+        "href": "https://github.com/Kyubyong/g2p/blob/87bea58193f1ed451a8edc77fc6848564a243820/g2p_en/train.py",
+        "id": "g2p_en_training",
+        "label": "g2p-en training source showing CMUdict input"
+      }
+    ],
+    "surface": "report",
+    "tables": [
+      {
+        "columns": [
+          {
+            "field": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "field": "prediction",
+            "label": "Prediction",
+            "type": "text"
+          },
+          {
+            "field": "canonical_reference",
+            "label": "First reference",
+            "type": "text"
+          },
+          {
+            "field": "matched_variant",
+            "label": "Matched variant",
+            "type": "text"
+          },
+          {
+            "field": "reference_count",
+            "format": "number",
+            "label": "References"
+          }
+        ],
+        "dataset": "variant_rescues",
+        "defaultSort": {
+          "direction": "asc",
+          "field": "name"
+        },
+        "density": "spacious",
+        "id": "variant_rescues_table",
+        "layout": "full",
+        "sourceId": "variant_rescue_query",
+        "subtitle": "Alphabetical sample of predictions matching a listed non-first reference.",
+        "title": "Examples rescued by variant-aware scoring"
+      },
+      {
+        "columns": [
+          {
+            "field": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "field": "prediction",
+            "label": "Prediction",
+            "type": "text"
+          },
+          {
+            "field": "closest_reference",
+            "label": "Closest reference",
+            "type": "text"
+          },
+          {
+            "field": "min_per",
+            "format": "percent",
+            "label": "Minimum PER"
+          },
+          {
+            "field": "reference_count",
+            "format": "number",
+            "label": "References"
+          }
+        ],
+        "dataset": "worst_cases",
+        "defaultSort": {
+          "direction": "desc",
+          "field": "min_per"
+        },
+        "density": "spacious",
+        "id": "worst_cases_table",
+        "layout": "full",
+        "sourceId": "worst_case_query",
+        "subtitle": "Twelve names with the highest minimum phoneme error rate across listed references.",
+        "title": "Largest phoneme disagreements"
+      },
+      {
+        "columns": [
+          {
+            "field": "check",
+            "label": "Check",
+            "type": "text"
+          },
+          {
+            "field": "status",
+            "label": "Status",
+            "type": "text"
+          },
+          {
+            "field": "observed",
+            "label": "Observed",
+            "type": "text"
+          },
+          {
+            "field": "decision_risk",
+            "label": "Why it matters",
+            "type": "text"
+          }
+        ],
+        "dataset": "data_quality",
+        "defaultSort": {
+          "direction": "asc",
+          "field": "check"
+        },
+        "density": "spacious",
+        "id": "quality_table",
+        "layout": "full",
+        "sourceId": "quality_query",
+        "subtitle": "Checks that determine which conclusions this public-data demonstration can support.",
+        "title": "Data and claim gates"
+      }
+    ],
+    "title": "Variant-Aware G2P Evaluation",
+    "version": 1
+  },
+  "package_info": {
+    "controls": {
+      "edit": false,
+      "refresh": false
+    },
+    "originUrl": "artifact://variant-aware-g2p-evaluation"
+  },
+  "snapshot": {
+    "datasets": {
+      "data_quality": [
+        {
+          "check": "ASCII-only eligibility",
+          "decision_risk": "This English-phone demo omits accented and non-Latin spellings.",
+          "observed": "40 names excluded",
+          "status": "CAVEAT"
+        },
+        {
+          "check": "Dictionary join coverage",
+          "decision_risk": "Missing names are not random; reported rates cannot represent all names.",
+          "observed": "64.5% of eligible names",
+          "status": "CAVEAT"
+        },
+        {
+          "check": "Model/reference independence",
+          "decision_risk": "Do not use these rates to rank or select a model.",
+          "observed": "g2p-en training code loads CMUdict",
+          "status": "BLOCK"
+        },
+        {
+          "check": "Normalized-name uniqueness",
+          "decision_risk": "Prevents duplicate weighting across the two source lists.",
+          "observed": "368 duplicate rows collapsed",
+          "status": "PASS"
+        },
+        {
+          "check": "Reference integrity",
+          "decision_risk": "Each scored row has at least one usable reference.",
+          "observed": "No empty or duplicate pronunciation variants",
+          "status": "PASS"
+        }
+      ],
+      "headline": [
+        {
+          "evaluated_names": 4862,
+          "multi_delta": 0.16721311475409834,
+          "multi_strict_exact": 0.4885245901639344,
+          "multi_variant_exact": 0.6557377049180327,
+          "strict_exact": 0.7219251336898396,
+          "variant_exact": 0.7324146441793501,
+          "variant_rescues": 51
+        }
+      ],
+      "scoring_by_cohort": [
+        {
+          "cohort": "Single reference",
+          "metric": "Canonical exact",
+          "numerator": 3361,
+          "rate": 0.7375466315558481,
+          "sample_size": 4557
+        },
+        {
+          "cohort": "Multiple references",
+          "metric": "Canonical exact",
+          "numerator": 149,
+          "rate": 0.4885245901639344,
+          "sample_size": 305
+        },
+        {
+          "cohort": "Single reference",
+          "metric": "Any-reference exact",
+          "numerator": 3361,
+          "rate": 0.7375466315558481,
+          "sample_size": 4557
+        },
+        {
+          "cohort": "Multiple references",
+          "metric": "Any-reference exact",
+          "numerator": 200,
+          "rate": 0.6557377049180327,
+          "sample_size": 305
+        },
+        {
+          "cohort": "Single reference",
+          "metric": "Within one phone",
+          "numerator": 3953,
+          "rate": 0.8674566600833882,
+          "sample_size": 4557
+        },
+        {
+          "cohort": "Multiple references",
+          "metric": "Within one phone",
+          "numerator": 256,
+          "rate": 0.839344262295082,
+          "sample_size": 305
+        },
+        {
+          "cohort": "Single reference",
+          "metric": "PER at most 25%",
+          "numerator": 3937,
+          "rate": 0.8639455782312925,
+          "sample_size": 4557
+        },
+        {
+          "cohort": "Multiple references",
+          "metric": "PER at most 25%",
+          "numerator": 254,
+          "rate": 0.8327868852459016,
+          "sample_size": 305
+        }
+      ],
+      "variant_rescues": [
+        {
+          "canonical_reference": "AE1 L D R IH0 K",
+          "matched_variant": "AO1 L D R IH0 K",
+          "name": "Aldric",
+          "prediction": "AO1 L D R IH0 K",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "AE1 L F R AH0 D",
+          "matched_variant": "AE1 L F R IH0 D",
+          "name": "Alfred",
+          "prediction": "AE1 L F R IH0 D",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "AE1 L AH0 S",
+          "matched_variant": "AE1 L IH0 S",
+          "name": "Alice",
+          "prediction": "AE1 L IH0 S",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "AE1 L AH0 S AH0 N",
+          "matched_variant": "AE1 L IH0 S AH0 N",
+          "name": "Allison",
+          "prediction": "AE1 L IH0 S AH0 N",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "AA1 G AH0 S T",
+          "matched_variant": "AO1 G AH0 S T",
+          "name": "August",
+          "prediction": "AO1 G AH0 S T",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "AA1 G AH0 S T IY2 N",
+          "matched_variant": "AO1 G AH0 S T IY2 N",
+          "name": "Augustine",
+          "prediction": "AO1 G AH0 S T IY2 N",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "B AO1 L D W AH0 N",
+          "matched_variant": "B AO1 L D W IH0 N",
+          "name": "Baldwin",
+          "prediction": "B AO1 L D W IH0 N",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "B AE1 R AH0 N",
+          "matched_variant": "B EH1 R AH0 N",
+          "name": "Baron",
+          "prediction": "B EH1 R AH0 N",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "B IY1 AH0 T R AH0 S",
+          "matched_variant": "B IY1 AH0 T R IH0 S",
+          "name": "Beatrice",
+          "prediction": "B IY1 AH0 T R IH0 S",
+          "reference_count": 4
+        },
+        {
+          "canonical_reference": "B EH1 N AH0 T",
+          "matched_variant": "B EH1 N IH0 T",
+          "name": "Bennett",
+          "prediction": "B EH1 N IH0 T",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "B R IY0 AE1 N AH0",
+          "matched_variant": "B R IY0 AA1 N AH0",
+          "name": "Briana",
+          "prediction": "B R IY0 AA1 N AH0",
+          "reference_count": 2
+        },
+        {
+          "canonical_reference": "K AE1 L V AH0 N",
+          "matched_variant": "K AE1 L V IH0 N",
+          "name": "Calvin",
+          "prediction": "K AE1 L V IH0 N",
+          "reference_count": 2
+        }
+      ],
+      "worst_cases": [
+        {
+          "closest_reference": "ER0",
+          "min_per": 2.0,
+          "name": "Er",
+          "prediction": "EH1 R",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "S UW1",
+          "min_per": 1.5,
+          "name": "Sioux",
+          "prediction": "S AY1 AH0 S",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "IY1 V",
+          "min_per": 1.5,
+          "name": "Yves",
+          "prediction": "V AY1 V Z",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "ZH AA1 ZH AA2",
+          "min_per": 1.5,
+          "name": "Zsazsa",
+          "prediction": "Z AA0 S AA1 T S AH0",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "AE0 D ER0 IY1",
+          "min_per": 1.0,
+          "name": "Adoree",
+          "prediction": "AH0 D AO1 R IY0",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "D AY2 AE1 N",
+          "min_per": 1.0,
+          "name": "Diahann",
+          "prediction": "D AY1 AH0 HH AE0 N",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "ZH IY1 L",
+          "min_per": 1.0,
+          "name": "Gilles",
+          "prediction": "G IH1 L Z",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "M ER0 IY1",
+          "min_per": 1.0,
+          "name": "Marie",
+          "prediction": "M EH1 R IY0",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "AH0 DH AA1",
+          "min_per": 1.0,
+          "name": "Otha",
+          "prediction": "AH1 TH AH0",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "SH ER0 IY1",
+          "min_per": 1.0,
+          "name": "Sheree",
+          "prediction": "SH EH1 R IY0",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "IH2 B R AA0 HH IY1 M",
+          "min_per": 0.8571428571428571,
+          "name": "Ibrahim",
+          "prediction": "B AY1 R AH0 M B",
+          "reference_count": 1
+        },
+        {
+          "closest_reference": "HH AA2 V IY0 EH1 R",
+          "min_per": 0.8333333333333334,
+          "name": "Javier",
+          "prediction": "Y AE1 V Y ER0",
+          "reference_count": 1
+        }
+      ]
+    },
+    "generatedAt": "2026-07-22T09:34:39Z",
+    "status": "ready",
+    "version": 1
+  },
+  "sources": [
+    {
+      "id": "headline_query",
+      "label": "Aggregate evaluation metrics",
+      "path": "evaluation.sqlite",
+      "query": {
+        "sql": "WITH overall AS (\n    SELECT\n        COUNT(*) AS evaluated_names,\n        AVG(strict_exact) AS strict_exact,\n        AVG(variant_exact) AS variant_exact,\n        SUM(rescued_by_variant_scoring) AS variant_rescues\n    FROM evaluation_rows\n),\nmulti_reference AS (\n    SELECT\n        AVG(strict_exact) AS multi_strict_exact,\n        AVG(variant_exact) AS multi_variant_exact\n    FROM evaluation_rows\n    WHERE reference_count > 1\n)\nSELECT\n    overall.evaluated_names,\n    overall.strict_exact,\n    overall.variant_exact,\n    multi_reference.multi_strict_exact,\n    multi_reference.multi_variant_exact,\n    multi_reference.multi_variant_exact - multi_reference.multi_strict_exact AS multi_delta,\n    overall.variant_rescues\nFROM overall\nCROSS JOIN multi_reference\n"
+      }
+    },
+    {
+      "id": "cohort_query",
+      "label": "Reference-cohort scoring metrics",
+      "path": "evaluation.sqlite",
+      "query": {
+        "sql": "WITH cohort_summary AS (\n    SELECT\n        CASE\n            WHEN reference_count = 1 THEN 'Single reference'\n            ELSE 'Multiple references'\n        END AS cohort,\n        COUNT(*) AS sample_size,\n        SUM(strict_exact) AS strict_count,\n        SUM(variant_exact) AS variant_count,\n        SUM(within_one_phone) AS one_phone_count,\n        SUM(per_at_most_25pct) AS per_25_count\n    FROM evaluation_rows\n    GROUP BY CASE\n        WHEN reference_count = 1 THEN 'Single reference'\n        ELSE 'Multiple references'\n    END\n),\nmetric_rows AS (\n    SELECT cohort, 'Canonical exact' AS metric,\n           1.0 * strict_count / sample_size AS rate,\n           sample_size, strict_count AS numerator, 1 AS metric_order\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'Any-reference exact',\n           1.0 * variant_count / sample_size,\n           sample_size, variant_count, 2\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'Within one phone',\n           1.0 * one_phone_count / sample_size,\n           sample_size, one_phone_count, 3\n    FROM cohort_summary\n    UNION ALL\n    SELECT cohort, 'PER at most 25%',\n           1.0 * per_25_count / sample_size,\n           sample_size, per_25_count, 4\n    FROM cohort_summary\n)\nSELECT cohort, metric, rate, sample_size, numerator\nFROM metric_rows\nORDER BY metric_order,\n         CASE cohort WHEN 'Single reference' THEN 1 ELSE 2 END\n"
+      }
+    },
+    {
+      "id": "variant_rescue_query",
+      "label": "Non-first reference exact matches",
+      "path": "evaluation.sqlite",
+      "query": {
+        "sql": "SELECT\n    display_name AS name,\n    prediction,\n    canonical_reference,\n    closest_reference AS matched_variant,\n    reference_count\nFROM evaluation_rows\nWHERE rescued_by_variant_scoring = 1\nORDER BY name\nLIMIT 12\n"
+      }
+    },
+    {
+      "id": "worst_case_query",
+      "label": "Largest minimum phoneme error rates",
+      "path": "evaluation.sqlite",
+      "query": {
+        "sql": "SELECT\n    display_name AS name,\n    prediction,\n    closest_reference,\n    min_per,\n    reference_count\nFROM evaluation_rows\nORDER BY min_per DESC, name\nLIMIT 12\n"
+      }
+    },
+    {
+      "id": "quality_query",
+      "label": "Data and claim gates",
+      "path": "evaluation.sqlite",
+      "query": {
+        "sql": "SELECT check_name AS 'check', status, observed, decision_risk\nFROM quality_checks\nORDER BY check_name\n"
+      }
+    },
+    {
+      "id": "evaluation_code",
+      "label": "Reproducible evaluator and report builder",
+      "path": "run_evaluation.py"
+    },
+    {
+      "href": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/names.zip",
+      "id": "nltk_names",
+      "label": "NLTK names corpus snapshot"
+    },
+    {
+      "href": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/cmudict.zip",
+      "id": "nltk_cmudict",
+      "label": "NLTK CMUdict snapshot"
+    },
+    {
+      "href": "https://github.com/Kyubyong/g2p/blob/87bea58193f1ed451a8edc77fc6848564a243820/g2p_en/train.py",
+      "id": "g2p_en_training",
+      "label": "g2p-en training source showing CMUdict input"
+    }
+  ],
+  "surface": "report"
+}

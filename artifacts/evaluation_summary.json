@@ -1,0 +1,76 @@
+{
+  "benchmark_status": "DEMO_ONLY_TRAINING_OVERLAP",
+  "cohorts": [
+    {
+      "cohort": "All names",
+      "mean_min_per": 0.08718488878916686,
+      "per_at_most_25pct": 0.8619909502262444,
+      "sample_size": 4862,
+      "strict_exact": 0.7219251336898396,
+      "variant_exact": 0.7324146441793501,
+      "variant_rescues": 51,
+      "within_one_phone": 0.8656931303990127
+    },
+    {
+      "cohort": "Single reference",
+      "mean_min_per": 0.08573903238156036,
+      "per_at_most_25pct": 0.8639455782312925,
+      "sample_size": 4557,
+      "strict_exact": 0.7375466315558481,
+      "variant_exact": 0.7375466315558481,
+      "variant_rescues": 0,
+      "within_one_phone": 0.8674566600833882
+    },
+    {
+      "cohort": "Multiple references",
+      "mean_min_per": 0.10878740567265158,
+      "per_at_most_25pct": 0.8327868852459016,
+      "sample_size": 305,
+      "strict_exact": 0.4885245901639344,
+      "variant_exact": 0.6557377049180327,
+      "variant_rescues": 51,
+      "within_one_phone": 0.839344262295082
+    }
+  ],
+  "generated_at": "2026-07-22T09:34:39Z",
+  "model": {
+    "claim_gate": "BLOCK_MODEL_RANKING",
+    "name": "g2p-en",
+    "prediction_path": "G2p.predict",
+    "reason": "The model training source loads CMUdict, which is also the gold-reference source.",
+    "version": "2.1.0"
+  },
+  "population": {
+    "duplicate_rows_removed": 368,
+    "eligible_unique_names": 7536,
+    "evaluated_names": 4862,
+    "join_coverage": 0.6451698513800425,
+    "multiple_reference_names": 305,
+    "non_ascii_names_excluded": 40,
+    "raw_name_rows": 7944,
+    "single_reference_names": 4557,
+    "unique_normalized_names": 7576
+  },
+  "quality_checks": {
+    "empty_reference_entries": 0,
+    "entries_with_duplicate_variants": 0,
+    "source_hashes_verified": true
+  },
+  "sources": {
+    "averaged_perceptron_tagger": {
+      "expected_sha256": "e1f13cf2532daadfd6f3bc481a49859f0b8ea6432ccdcd83e6a49a5f19008de9",
+      "observed_sha256": "e1f13cf2532daadfd6f3bc481a49859f0b8ea6432ccdcd83e6a49a5f19008de9",
+      "url": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/taggers/averaged_perceptron_tagger.zip"
+    },
+    "cmudict": {
+      "expected_sha256": "d07cca47fd72ad32ea9d8ad1219f85301eeaf4568f8b6b73747506a71fb5afd6",
+      "observed_sha256": "d07cca47fd72ad32ea9d8ad1219f85301eeaf4568f8b6b73747506a71fb5afd6",
+      "url": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/cmudict.zip"
+    },
+    "names": {
+      "expected_sha256": "0eec7e958b34982662b8f05824ae64642dea097b08057ade65c252191c5fe7ca",
+      "observed_sha256": "0eec7e958b34982662b8f05824ae64642dea097b08057ade65c252191c5fe7ca",
+      "url": "https://raw.githubusercontent.com/nltk/nltk_data/550b6625bcef1f2abff2ff770a5a0d272c9c6b2a/packages/corpora/names.zip"
+    }
+  }
+}

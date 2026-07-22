@@ -1,0 +1,9 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+.coverage
+.pytest_cache/
+.mypy_cache/
+.nltk_data/
+.source_cache/
