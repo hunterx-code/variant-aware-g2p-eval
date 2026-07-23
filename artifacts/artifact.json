@@ -56,7 +56,7 @@
         "type": "table"
       },
       {
-        "body": "## Scope, data, and metric definitions\n\nThe unit is one lowercase ASCII name spelling. The source population contains 7,944 rows across NLTK's two first-name lists; normalization leaves 7,536 eligible unique spellings, of which 4,862 join to CMUdict (64.5%). Canonical exact means equality to the first reference. Any-reference exact means equality to at least one listed reference. PER is phoneme-level Levenshtein distance divided by reference length, minimized across references.",
+        "body": "## Scope, data, and metric definitions\n\nThe unit is one lowercase name spelling containing only the letters a through z. The source population contains 7,944 rows across NLTK's two first-name lists; normalization leaves 7,536 eligible unique spellings, of which 4,862 join to CMUdict (64.5%). Canonical exact means equality to the first reference. Any-reference exact means equality to at least one listed reference. PER is phoneme-level Levenshtein distance divided by reference length, minimized across references.",
         "id": "scope",
         "sourceId": "headline_query",
         "type": "markdown"
@@ -429,15 +429,15 @@
     "datasets": {
       "data_quality": [
         {
-          "check": "ASCII-only eligibility",
-          "decision_risk": "This English-phone demo omits accented and non-Latin spellings.",
-          "observed": "40 names excluded",
-          "status": "CAVEAT"
-        },
-        {
           "check": "Dictionary join coverage",
           "decision_risk": "Missing names are not random; reported rates cannot represent all names.",
           "observed": "64.5% of eligible names",
+          "status": "CAVEAT"
+        },
+        {
+          "check": "Letters-only eligibility",
+          "decision_risk": "This demo excludes spellings with spaces, punctuation, or characters outside a-z.",
+          "observed": "40 spellings excluded",
           "status": "CAVEAT"
         },
         {

@@ -46,9 +46,9 @@
     "evaluated_names": 4862,
     "join_coverage": 0.6451698513800425,
     "multiple_reference_names": 305,
-    "non_ascii_names_excluded": 40,
     "raw_name_rows": 7944,
     "single_reference_names": 4557,
+    "spellings_excluded_by_letters_only_filter": 40,
     "unique_normalized_names": 7576
   },
   "quality_checks": {

@@ -272,10 +272,16 @@ def build_quality_rows(summary: dict[str, Any]) -> list[dict[str, str]]:
             "decision_risk": "Prevents duplicate weighting across the two source lists.",
         },
         {
-            "check": "ASCII-only eligibility",
+            "check": "Letters-only eligibility",
             "status": "CAVEAT",
-            "observed": f"{summary['population']['non_ascii_names_excluded']} names excluded",
-            "decision_risk": "This English-phone demo omits accented and non-Latin spellings.",
+            "observed": (
+                f"{summary['population']['spellings_excluded_by_letters_only_filter']} "
+                "spellings excluded"
+            ),
+            "decision_risk": (
+                "This demo excludes spellings with spaces, punctuation, or "
+                "characters outside a-z."
+            ),
         },
         {
             "check": "Dictionary join coverage",
@@ -661,7 +667,7 @@ def build_artifact(
                     "sourceId": "headline_query",
                     "body": (
                         "## Scope, data, and metric definitions\n\n"
-                        f"The unit is one lowercase ASCII name spelling. The source population contains {summary['population']['raw_name_rows']:,} rows across NLTK's two first-name lists; "
+                        f"The unit is one lowercase name spelling containing only the letters a through z. The source population contains {summary['population']['raw_name_rows']:,} rows across NLTK's two first-name lists; "
                         f"normalization leaves {summary['population']['eligible_unique_names']:,} eligible unique spellings, of which {summary['population']['evaluated_names']:,} join to CMUdict ({summary['population']['join_coverage']:.1%}). "
                         "Canonical exact means equality to the first reference. Any-reference exact means equality to at least one listed reference. "
                         "PER is phoneme-level Levenshtein distance divided by reference length, minimized across references."
@@ -786,7 +792,7 @@ def run(cache_dir: Path, output_dir: Path, generated_at: str) -> dict[str, Any]:
             "raw_name_rows": len(raw_names),
             "unique_normalized_names": len(unique_names),
             "duplicate_rows_removed": len(raw_names) - len(unique_names),
-            "non_ascii_names_excluded": len(unique_names) - len(eligible_names),
+            "spellings_excluded_by_letters_only_filter": len(unique_names) - len(eligible_names),
             "eligible_unique_names": len(eligible_names),
             "evaluated_names": len(rows),
             "join_coverage": len(rows) / len(eligible_names),

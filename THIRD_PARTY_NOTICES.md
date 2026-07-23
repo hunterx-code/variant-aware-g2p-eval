@@ -1,4 +1,6 @@
-# Third-Party Data Notices
+# Third-Party Notices
+
+## Data sources
 
 This project downloads the NLTK `names` and `cmudict` data packages at the
 pinned commit identified in `run_evaluation.py`. The project does not include
@@ -62,3 +64,26 @@ Original source references in the NLTK package README:
 
 - <ftp://ftp.cs.cmu.edu/project/speech/dict/>
 - <https://cmusphinx.svn.sourceforge.net/svnroot/cmusphinx/trunk/cmudict/cmudict.0.7a>
+
+## Software dependencies
+
+The repository does not vendor these packages. They are installed separately
+from the exact versions in `requirements.txt` and retain their own licenses.
+The installed distribution metadata and bundled license files remain
+controlling:
+
+| Package | Version | License metadata |
+|---|---:|---|
+| Distance | 0.1.3 | GPL-2.0 |
+| click | 8.4.2 | BSD-3-Clause |
+| defusedxml | 0.7.1 | Python Software Foundation License |
+| g2p-en | 2.1.0 | Apache-2.0 |
+| inflect | 7.5.0 | MIT |
+| joblib | 1.5.3 | BSD-3-Clause |
+| more-itertools | 11.1.0 | MIT |
+| nltk | 3.10.0 | Apache-2.0 |
+| numpy | 2.5.1 | BSD-3-Clause plus bundled permissive components |
+| regex | 2026.7.19 | Apache-2.0 and CNRI-Python |
+| tqdm | 4.69.0 | MPL-2.0 and MIT |
+| typeguard | 4.5.2 | MIT |
+| typing_extensions | 4.16.0 | PSF-2.0 |
